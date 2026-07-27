@@ -140,6 +140,14 @@ export default {
           headers: responseHeaders
         });
       }
+      
+      // 3.5 Debug API
+      if (url.pathname === '/api/debug') {
+        return jsonResponse({
+          hasToken: !!env.HF_TOKEN,
+          tokenPrefix: env.HF_TOKEN ? env.HF_TOKEN.substring(0, 4) : null
+        });
+      }
 
       // 4. Serve Static Assets for everything else
       return env.ASSETS.fetch(request);

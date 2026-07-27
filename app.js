@@ -12,7 +12,7 @@
       {
         id: 'Lalapo1/chiyo',
         name: 'Chiyo',
-        type: 'bucket',
+        type: 'dataset',
         revision: 'main'
       }
     ],
