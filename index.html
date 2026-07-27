@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HF Drive Index</title>
+  <meta name="description" content="Browse and download files from HuggingFace Storage Buckets">
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='80' font-size='80'>📦</text></svg>">
+</head>
+<body>
+  <div class="bg-pattern"></div>
+
+  <!-- ═══ LOGIN OVERLAY ═══ -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-card">
+      <div class="login-header">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path opacity="0.25" d="M36 4H12C7.58172 4 4 7.58172 4 12V36C4 40.4183 7.58172 44 12 44H36C40.4183 44 44 40.4183 44 36V12C44 7.58172 40.4183 4 36 4Z" fill="currentColor" style="color:#6366f1"/>
+          <path opacity="0.5" d="M31 11H17C13.6863 11 11 13.6863 11 17V31C11 34.3137 13.6863 37 17 37H31C34.3137 37 37 34.3137 37 31V17C37 13.6863 34.3137 11 31 11Z" fill="currentColor" style="color:#6366f1"/>
+          <path d="M27 18H21C19.3431 18 18 19.3431 18 21V27C18 28.6569 19.3431 30 21 30H27C28.6569 30 30 28.6569 30 27V21C30 19.3431 28.6569 18 27 18Z" fill="currentColor" style="color:#6366f1"/>
+        </svg>
+        <h1>HF Drive <span style="background:linear-gradient(135deg,#6366f1,#a78bfa);-webkit-background-clip:text;-webkit-text-fill-color:transparent;">Index</span></h1>
+        <p>Sign in to access files</p>
+      </div>
+      <div class="login-error" id="loginError"></div>
+      <form id="loginForm">
+        <div class="form-group">
+          <label class="form-label" for="username">Username</label>
+          <input class="form-input" type="text" id="username" name="username" placeholder="Enter username" required autocomplete="username">
+        </div>
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input class="form-input" type="password" id="password" name="password" placeholder="Enter password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
+          Sign In
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- ═══ MAIN APP ═══ -->
+  <div class="app" id="app" style="display:none;">
+    <!-- Navbar -->
+    <header class="navbar" id="navbar">
+      <div class="nav-brand">
+        <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path opacity="0.25" d="M36 4H12C7.58172 4 4 7.58172 4 12V36C4 40.4183 7.58172 44 12 44H36C40.4183 44 44 40.4183 44 36V12C44 7.58172 40.4183 4 36 4Z" fill="currentColor" style="color:#6366f1"/>
+          <path opacity="0.5" d="M31 11H17C13.6863 11 11 13.6863 11 17V31C11 34.3137 13.6863 37 17 37H31C34.3137 37 37 34.3137 37 31V17C37 13.6863 34.3137 11 31 11Z" fill="currentColor" style="color:#6366f1"/>
+          <path d="M27 18H21C19.3431 18 18 19.3431 18 21V27C18 28.6569 19.3431 30 21 30H27C28.6569 30 30 28.6569 30 27V21C30 19.3431 28.6569 18 27 18Z" fill="currentColor" style="color:#6366f1"/>
+        </svg>
+        <span>HF Drive <span class="brand-accent">Index</span></span>
+      </div>
+
+      <div class="search-wrapper">
+        <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" class="search-input" id="searchInput" placeholder="Search files...">
+      </div>
+
+      <div class="nav-actions">
+        <!-- Theme Toggle -->
+        <button class="icon-btn" id="themeToggle" title="Toggle theme">
+          <svg id="iconMoon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="iconSun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="display:none"><circle cx="12" cy="12" r="5"/><path d="M12 1v2m0 18v2M4.22 4.22l1.42 1.42m12.73 12.73 1.42 1.42M1 12h2m18 0h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        </button>
+
+        <!-- User Badge -->
+        <div class="user-badge" id="userBadge">
+          <div class="avatar" id="userAvatar">A</div>
+          <span id="userName">admin</span>
+        </div>
+
+        <!-- Logout -->
+        <button class="icon-btn" id="logoutBtn" title="Logout">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4m7 14 5-5-5-5m5 5H9"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb" id="breadcrumb"></nav>
+
+      <!-- Info Bar -->
+      <div class="info-bar" id="infoBar">
+        <div class="info-bar-left">
+          <span id="fileCount">Loading...</span>
+        </div>
+        <div class="info-bar-right">
+          <span id="repoInfo"></span>
+        </div>
+      </div>
+
+      <!-- File Table -->
+      <div class="file-table-container" id="fileTableContainer">
+        <table class="file-table">
+          <thead>
+            <tr>
+              <th class="col-name" data-sort="name" id="sortName">
+                Name <span class="sort-icon">↕</span>
+              </th>
+              <th class="col-size" data-sort="size" id="sortSize">
+                Size <span class="sort-icon">↕</span>
+              </th>
+              <th class="col-date" data-sort="date" id="sortDate">
+                Modified <span class="sort-icon">↕</span>
+              </th>
+              <th class="col-actions">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="fileList"></tbody>
+        </table>
+
+        <!-- Loading State -->
+        <div class="loading-container" id="loadingState">
+          <div class="spinner"></div>
+          <span class="loading-text">Loading files...</span>
+        </div>
+
+        <!-- Empty State -->
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 7v10a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2h-6l-2-2H5a2 2 0 0 0-2 2z"/></svg>
+          <h3>No files found</h3>
+          <p>This folder is empty or no results match your search.</p>
+        </div>
+      </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="footer">
+      <p>Powered by <a href="https://huggingface.co" target="_blank">HuggingFace</a> • Hosted on <a href="https://pages.cloudflare.com" target="_blank">Cloudflare Pages</a></p>
+    </footer>
+  </div>
+
+  <!-- ═══ MEDIA PREVIEW MODAL ═══ -->
+  <div class="modal-overlay" id="mediaModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <span class="modal-title" id="modalTitle">Preview</span>
+        <div style="display:flex;gap:0.5rem;">
+          <button class="btn btn-sm btn-ghost" id="modalDownload">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4m4-5 5 5 5-5m-5 5V3"/></svg>
+            Download
+          </button>
+          <button class="icon-btn" id="modalClose">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6 6 18M6 6l12 12"/></svg>
+          </button>
+        </div>
+      </div>
+      <div class="modal-body" id="modalBody"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TOAST ═══ -->
+  <div class="toast" id="toast"></div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,10 @@
+{
+  "name": "hf-drive-index",
+  "version": "1.0.0",
+  "private": true,
+  "description": "HuggingFace Drive Index — File browser for HuggingFace buckets, deployed on Cloudflare Pages",
+  "scripts": {
+    "dev": "npx wrangler pages dev . --port 8788",
+    "deploy": "npx wrangler pages deploy ."
+  }
+}
