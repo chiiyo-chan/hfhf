@@ -53,17 +53,22 @@ export async function onRequestGet(context) {
     const data = await response.json();
 
     // Normalize the response
-    const files = Array.isArray(data) ? data.map(item => ({
-      path: item.path || '',
-      type: item.type || 'file', // 'directory' or 'file'
-      size: item.size || 0,
-      oid: item.oid || '',
-      lfs: item.lfs || null,
-      lastCommit: item.lastCommit || null,
-      lastModified: item.lastCommit?.date || null,
+    const files = Array.isArray(data) ? data.map(item => {
+      let fileObj = {
+        path: item.path || '',
+        type: item.type || 'file', // 'directory' or 'file'
+        size: item.size || 0,
+        oid: item.oid || '',
+        lfs: item.lfs || null,
+        lastCommit: item.lastCommit || null,
+        lastModified: item.lastCommit && item.lastCommit.date ? item.lastCommit.date : null
+      };
       // Use LFS size if available
-      ...(item.lfs ? { size: item.lfs.size } : {})
-    })) : [];
+      if (item.lfs && item.lfs.size) {
+        fileObj.size = item.lfs.size;
+      }
+      return fileObj;
+    }) : [];
 
     return jsonResponse(files);
   } catch (e) {
