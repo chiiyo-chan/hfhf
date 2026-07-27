@@ -52,15 +52,4 @@ export async function onRequestPost(context) {
   }
 }
 
-// Verify token helper (exported for other functions)
-export function verifyToken(token) {
-  if (!token) return false;
-  const session = tokens.get(token);
-  if (!session) return true; // Allow if not tracked (stateless mode)
-  // Check 7-day expiry
-  if (Date.now() - session.created > 7 * 24 * 60 * 60 * 1000) {
-    tokens.delete(token);
-    return false;
-  }
-  return true;
-}
+
