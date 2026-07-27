@@ -1,6 +1,17 @@
 // /api/list — List files from HuggingFace bucket/repo
 // Cloudflare Pages Function
 
+function jsonResponse(data, status = 200) {
+  return new Response(JSON.stringify(data), {
+    status,
+    headers: {
+      'Content-Type': 'application/json',
+      'Cache-Control': 'public, max-age=300',
+      'Access-Control-Allow-Origin': '*'
+    }
+  });
+}
+
 export async function onRequestGet(context) {
   const url = new URL(context.request.url);
   const repo = url.searchParams.get('repo') || 'Lalapo1/chiyo';
@@ -9,9 +20,6 @@ export async function onRequestGet(context) {
   const path = url.searchParams.get('path') || '';
 
   // Build HuggingFace API URL
-  // For buckets: /api/buckets/{namespace}/{repo}/tree/{revision}/{path}
-  // For models:  /api/models/{repo}/tree/{revision}/{path}
-  // For datasets: /api/datasets/{repo}/tree/{revision}/{path}
   let apiUrl;
   const repoType = type === 'bucket' ? 'buckets' : type === 'dataset' ? 'datasets' : 'models';
 
@@ -37,18 +45,9 @@ export async function onRequestGet(context) {
     if (!response.ok) {
       // If 404, return empty array (empty folder)
       if (response.status === 404) {
-        return Response.json([], {
-          headers: {
-            'Content-Type': 'application/json',
-            'Cache-Control': 'public, max-age=300',
-            'Access-Control-Allow-Origin': '*'
-          }
-        });
+        return jsonResponse([]);
       }
-      return Response.json(
-        { error: `HuggingFace API error: ${response.status}` },
-        { status: response.status }
-      );
+      return jsonResponse({ error: `HuggingFace API error: ${response.status}` }, response.status);
     }
 
     const data = await response.json();
@@ -66,17 +65,8 @@ export async function onRequestGet(context) {
       ...(item.lfs ? { size: item.lfs.size } : {})
     })) : [];
 
-    return Response.json(files, {
-      headers: {
-        'Content-Type': 'application/json',
-        'Cache-Control': 'public, max-age=300',
-        'Access-Control-Allow-Origin': '*'
-      }
-    });
+    return jsonResponse(files);
   } catch (e) {
-    return Response.json(
-      { error: 'Failed to fetch from HuggingFace', details: e.message },
-      { status: 500 }
-    );
+    return jsonResponse({ error: 'Failed to fetch from HuggingFace', details: e.message }, 500);
   }
 }
